@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>PyScript IDE</title>
+    <link
+      rel="stylesheet"
+      href="https://pyscript.net/releases/2025.3.1/core.css"
+    />
+    <script
+      type="module"
+      src="https://pyscript.net/releases/2025.3.1/core.js"
+    ></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background: #f4f4f4;
+      }
+
+      textarea {
+        width: 100%;
+        height: 200px;
+        font-family: monospace;
+        font-size: 14px;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+      }
+
+      button {
+        margin-top: 10px;
+        padding: 10px 20px;
+        font-size: 16px;
+      }
+
+      #output {
+        margin-top: 20px;
+        background: #222;
+        color: #0f0;
+        padding: 10px;
+        border-radius: 8px;
+        min-height: 50px;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>PyScript IDE</h1>
+    <textarea id="editor">
+print("Hello from PyScript!")
+for i in range(3):
+    print("Line", i)
+
+    </textarea>
+    <br />
+    <button onclick="runCode()">Run Code</button>
+    <div id="output"></div>
+
+    <py-script id="runner"></py-script>
+    <script>
+      function runCode() {
+        const code = document.getElementById("editor").value;
+        const output = document.getElementById("output");
+
+        // Clear previous output
+        output.innerHTML = "";
+
+        // Create a new <py-script> element
+        const pyScript = document.createElement("py-script");
+        pyScript.innerHTML = `
+from pyscript import display
+import sys
+
+class Capture:
+    def __init__(self):
+        self.output = ""
+    def write(self, s):
+        self.output += s
+    def flush(self): pass
+
+cap = Capture()
+sys.stdout = cap
+sys.stderr = cap
+
+try:
+    exec(\"\"\"${code
+      .replace(/\\/g, "\\\\")
+      .replace(/`/g, "\\`")
+      .replace(/"/g, '\\"')}\"\"\")
+except Exception as e:
+    print("Error:", e)
+
+display(cap.output)
+  `;
+
+        // Append to output div
+        output.appendChild(pyScript);
+      }
+    </script>
+  </body>
+</html>
